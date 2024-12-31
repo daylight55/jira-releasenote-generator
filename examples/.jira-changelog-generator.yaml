@@ -1,0 +1,29 @@
+# VCS設定
+vcs:
+  # 使用するVCSタイプ: "github" または "gitlab"
+  type: github
+  # APIトークン
+  token: your-vcs-token
+  # クラウド版を使用するかどうか
+  is-cloud: true
+  # オンプレミス版の場合のサーバーURL
+  server-url: ""
+  # GitHubの場合のリポジトリオーナー
+  owner: daylight55
+  # GitHubの場合のリポジトリ名、GitLabの場合のプロジェクトID
+  repository: jira-changelog-generator
+
+# Jira設定
+jira:
+  # Jiraのユーザー名（通常はメールアドレス）
+  username: your-email@example.com
+  # JiraのAPIトークン
+  token: your-jira-token
+  # クラウド版を使用するかどうか
+  is-cloud: true
+  # オンプレミス版の場合のサーバーURL
+  server-url: ""
+
+# タグ設定（コマンドラインで上書き可能）
+from-tag: ""
+to-tag: ""

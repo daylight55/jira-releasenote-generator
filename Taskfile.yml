@@ -1,0 +1,82 @@
+version: '3'
+
+vars:
+  VERSION:
+    sh: git describe --tags --always --dirty
+  COMMIT:
+    sh: git rev-parse --short HEAD
+  DATE:
+    sh: date -u +"%Y-%m-%dT%H:%M:%SZ"
+  GO_VERSION:
+    sh: go version | cut -d" " -f3
+  
+  LDFLAGS: >-
+    -X github.com/daylight55/jira-releasenote-generator/internal/cmd.Version={{.VERSION}}
+    -X github.com/daylight55/jira-releasenote-generator/internal/cmd.Commit={{.COMMIT}}
+    -X github.com/daylight55/jira-releasenote-generator/internal/cmd.Date={{.DATE}}
+    -X github.com/daylight55/jira-releasenote-generator/internal/cmd.GoVersion={{.GO_VERSION}}
+
+tasks:
+  build:
+    desc: バイナリをビルドします
+    cmds:
+      - go build -ldflags "{{.LDFLAGS}}" -o bin/jira-releasenote-generator
+
+  install:
+    desc: アプリケーションをシステムにインストールします
+    cmds:
+      - go install -ldflags "{{.LDFLAGS}}"
+
+  test:
+    desc: すべてのテストを実行します
+    cmds:
+      - go test -v ./...
+
+  test:watch:
+    desc: テストをウォッチモードで実行します
+    cmds:
+      - go test -v ./... -count=1 -watch
+
+  lint:
+    desc: コードの静的解析を実行します
+    cmds:
+      - golangci-lint run
+
+  clean:
+    desc: ビルド成果物とキャッシュを削除します
+    cmds:
+      - rm -rf bin/
+      - go clean -cache
+
+  release:
+    desc: 新しいリリースを作成します
+    cmds:
+      - task: test
+      - task: lint
+      - task: build
+    vars:
+      VERSION: '{{.CLI_ARGS}}'
+    preconditions:
+      - sh: test "$(git status --porcelain)" = ""
+        msg: "ワーキングディレクトリが清潔ではありません"
+
+  dev:
+    desc: 開発用のホットリロードを実行します
+    cmds:
+      - air -c .air.toml
+
+  docs:
+    desc: godocを使用してドキュメントを生成します
+    cmds:
+      - godoc -http=:6060
+
+  deps:update:
+    desc: 依存関係を最新バージョンに更新します
+    cmds:
+      - go get -u ./...
+      - go mod tidy
+
+  default:
+    desc: デフォルトタスクとしてビルドを実行します
+    cmds:
+      - task: build
